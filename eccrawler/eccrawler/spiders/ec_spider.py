@@ -1,7 +1,3 @@
-import urllib
-import os
-import mechanize
-import requests
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.selector import HtmlXPathSelector
 from eccrawler.items import EccrawlerItem
@@ -11,11 +7,34 @@ from bs4 import BeautifulSoup
 
 class ECSpider(CrawlSpider):
 	name = 'EC'
+	allowed_domains = ['http://environmentclearance.nic.in/Search.aspx']
 	start_urls = ['http://environmentclearance.nic.in/gotosearch.aspx?pid=ECGranted']
 
+	def parse_page(self, response):
+		EVENTVALIDATION = response.xpath("//*[@id='__EVENTVALIDATION']/@value").extract()
+		VIEWSTATE = response.xpath("//*[@id='__VIEWSTATE']/@value").extract()
+		LASTFOCUS = response.xpath("//*[@id='__LASTFOCUS']/@value").extract()
+		VIEWSTATEGENERATOR = response.xpath("//*[@id='__VIEWSTATEGENERATOR']/@value").extract()
+		for i in range(1,4):
+			data = {
+				'__EVENTTARGET': 'GridView1',
+				'__EVENTARGUMENT': "'Page$" + str(i) + "'",
+				'__LASTFOCUS': LASTFOCUS,
+				'__VIEWSTATE': VIEWSTATE, 
+				'__VIEWSTATEGENERATOR': VIEWSTATEGENERATOR,
+				'__EVENTVALIDATION': EVENTVALIDATION,
+				}
+			currentPage = FormRequest.from_response(
+				response, 
+				formdata = data, 
+				method = 'POST', 
+				callback = self.parse
+				)
+			open_in_browser(currentPage)
+			yield currentPage
+
 	def parse(self, response):
-		
-		open_in_browser(response)
+	#	open_in_browser(response)
 		soup = BeautifulSoup(response.body_as_unicode(), 'html.parser')
 
 		table = soup.find("table", {"class" : "ez1"})
@@ -60,40 +79,6 @@ class ECSpider(CrawlSpider):
 				item['comp_submit'] = len(compliances)
 
 	 			yield item	
-
-	def parse_page(self, response):
-
-		currentPage = 1
-		while (currentPage < 4):
-			nextPage = currentPage + 1
-
-			EVENTVALIDATION = response.xpath("//*[@id='__EVENTVALIDATION']/@value").extract()
-			VIEWSTATE = response.xpath("//*[@id='__VIEWSTATE']/@value").extract()
-			#nextPage = currentPage + 1
-			data = {
-			#	'ww': 'rr|GridView1',
-			#	'a': 'rb1',
-				'ddlstatus': 'UPEChome',
-				'ddlyear': '-All Years-',
-				'ddlcategory': '-All Category-',
-				'ddlstate': '-All State-',
-				'textbox2': '',
-				'DropDownList1': 'UPEC',
-				'__EVENTTARGET': 'GridView1',
-				'__EVENTARGUMENT': "'Page$" + str(nextPage) + "'",
-			#	'__LASTFOCUS': '',
-				'__VIEWSTATE': VIEWSTATE, 
-			#	'__VIEWSTATEGENERATOR': 'BBBC20B8',
-				'__EVENTVALIDATION': EVENTVALIDATION,
-			#	'__ASYNCPOST': 'true',
-			#	'': ''
-				}
-			yield FormRequest.from_response(response, 
-				formname = 'form1', 
-				formdata=data, 
-				callback= self.parse
-				 )
-
 		
 
 
