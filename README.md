@@ -16,8 +16,8 @@ Although python cannot interact with the javascript function, we can pass the ar
 * ~~Download scrapy~~
 * ~~Set up container, pipeline, and settings~~
 * ~~Test scraping code for first page~~
-* ~~Generalize to all pages~~
-* ~~Figure out doPostback issue~~
+* Generalize to all pages
+* Figure out doPostback issue
 
 ### Sources
 * [stack overflow question 1](http://stackoverflow.com/questions/23885771/scraping-with-dopostback-with-link-url-hidden)
