@@ -15,10 +15,11 @@ class ECSpider(CrawlSpider):
 		VIEWSTATE = response.xpath("//*[@id='__VIEWSTATE']/@value").extract()
 		LASTFOCUS = response.xpath("//*[@id='__LASTFOCUS']/@value").extract()
 		VIEWSTATEGENERATOR = response.xpath("//*[@id='__VIEWSTATEGENERATOR']/@value").extract()
-		for i in range(1,4):
+		for i in range(1,10):
+			nextPage = "'Page$" + str(i) + "'"
 			data = {
 				'__EVENTTARGET': 'GridView1',
-				'__EVENTARGUMENT': "'Page$" + str(i) + "'",
+				'__EVENTARGUMENT': nextPage,
 				'__LASTFOCUS': LASTFOCUS,
 				'__VIEWSTATE': VIEWSTATE, 
 				'__VIEWSTATEGENERATOR': VIEWSTATEGENERATOR,
@@ -30,11 +31,10 @@ class ECSpider(CrawlSpider):
 				method = 'POST', 
 				callback = self.parse
 				)
-			open_in_browser(currentPage)
 			yield currentPage
 
 	def parse(self, response):
-	#	open_in_browser(response)
+		open_in_browser(response)
 		soup = BeautifulSoup(response.body_as_unicode(), 'html.parser')
 
 		table = soup.find("table", {"class" : "ez1"})
@@ -79,9 +79,3 @@ class ECSpider(CrawlSpider):
 				item['comp_submit'] = len(compliances)
 
 	 			yield item	
-		
-
-
-
-
-
