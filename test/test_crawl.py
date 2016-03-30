@@ -19,8 +19,10 @@ soup = BeautifulSoup(html, 'html.parser')
 
 table = soup.find("table", {"class" : "ez1"})
 rows = table.findAll('tr')
-currentPage = table.find('tr', {'class': 'black'}).span.text
+currentPage = int(table.find('tr', {'class': 'black'}).span.text)
+print currentPage
 
+sssssss
 master = []
 for row in rows[1:len(rows)-1]:
 

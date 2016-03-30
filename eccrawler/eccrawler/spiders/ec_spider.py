@@ -7,36 +7,37 @@ from bs4 import BeautifulSoup
 
 class ECSpider(CrawlSpider):
 	name = 'EC'
-	allowed_domains = ['http://environmentclearance.nic.in/Search.aspx']
-	start_urls = ['http://environmentclearance.nic.in/gotosearch.aspx?pid=ECGranted']
-
-	def parse_page(self, response):
-		EVENTVALIDATION = response.xpath("//*[@id='__EVENTVALIDATION']/@value").extract()
-		VIEWSTATE = response.xpath("//*[@id='__VIEWSTATE']/@value").extract()
-		LASTFOCUS = response.xpath("//*[@id='__LASTFOCUS']/@value").extract()
-		VIEWSTATEGENERATOR = response.xpath("//*[@id='__VIEWSTATEGENERATOR']/@value").extract()
-		for i in range(1,10):
-			nextPage = "'Page$" + str(i) + "'"
-			data = {
-				'__EVENTTARGET': 'GridView1',
-				'__EVENTARGUMENT': nextPage,
-				'__LASTFOCUS': LASTFOCUS,
-				'__VIEWSTATE': VIEWSTATE, 
-				'__VIEWSTATEGENERATOR': VIEWSTATEGENERATOR,
-				'__EVENTVALIDATION': EVENTVALIDATION,
-				}
-			currentPage = FormRequest.from_response(
-				response, 
-				formdata = data, 
-				method = 'POST', 
-				callback = self.parse
-				)
-			yield currentPage
+	allowed_domains = ['http://environmentclearance.nic.in']
+	#start_urls = ['http://environmentclearance.nic.in/gotosearch.aspx?pid=ECGranted']
+	start_urls = ['http://environmentclearance.nic.in/Search.aspx']
 
 	def parse(self, response):
-		open_in_browser(response)
-		soup = BeautifulSoup(response.body_as_unicode(), 'html.parser')
+		EVENTVALIDATION = response.xpath("//*[@id='__EVENTVALIDATION']/@value").extract()
+		VIEWSTATE = response.xpath("//*[@id='__VIEWSTATE']/@value").extract()
+		for i in range(1, 5):
+			yield FormRequest(
+				'http://environmentclearance.nic.in/Search.aspx',
+				headers = {'user-agent': 'Mozilla/5.0'},
+				formdata = {
+					'ww': 'rr|GridView1',
+					'__LASTFOCUS': '',
+					'__EVENTTARGET': 'GridView1',
+					'__EVENTARGUMENT': 'Page${}'.format(i),
+					'__VIEWSTATE': VIEWSTATE, 
+					'__EVENTVALIDATION': EVENTVALIDATION,
+					'a': 'rb1',
+					'dd1status': 'UPEChome',
+					'ddlyear': '-All Years-',
+					'ddlcategory': '-All Category-',
+					'ddlstate': '-All State-',
+					'textbox2': '',
+					'DropDownList1': 'UPEC'
+					}, 
+				callback = self.parse_item
+			) 
 
+	def parse_item(self, response):
+		soup = BeautifulSoup(response.body_as_unicode(), 'html.parser')
 		table = soup.find("table", {"class" : "ez1"})
 		rows = table.findAll('tr')
 
@@ -79,3 +80,5 @@ class ECSpider(CrawlSpider):
 				item['comp_submit'] = len(compliances)
 
 	 			yield item	
+
+	 	
