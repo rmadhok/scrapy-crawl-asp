@@ -3,6 +3,11 @@ from unidecode import unidecode
 import requests
 
 def scrape_central(page):
+    """
+    Takes a central page url, extracts relevant data 
+    and iteratively adds row data dictionary
+    to list.
+    """
     soup = BeautifulSoup(page, 'html.parser')
     table = soup.find("table", {"class" : "ez1"})
     rows = table.findAll('tr')
@@ -77,6 +82,13 @@ def scrape_central(page):
     return data_page 
 
 def scrape_state(page):
+    """ 
+    Takes a state page, parses relevant data
+    and iteratively adds row data dictionary
+    to list. For each row, after parsing data,
+    follows timeline link to extract additional info
+    """ 
+
     top = 'http://environmentclearance.nic.in/'
     soup = BeautifulSoup(page, 'html.parser')
     table = soup.find("table", {"class" : "ez1"})
@@ -140,6 +152,10 @@ def scrape_state(page):
     return data_page
 
 def getFormData(page):
+    """
+    Finds form data required to post request for 
+    next page. Returns tuple with data
+    """
     soup = BeautifulSoup(page, 'html.parser')
     viewstate  = soup.find('input', {'id': '__VIEWSTATE'         })['value']
     generator  = soup.find('input', {'id': '__VIEWSTATEGENERATOR'})['value']
