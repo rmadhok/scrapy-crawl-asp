@@ -1,5 +1,7 @@
 ## Heavy-Duty Web Crawling Framework for Scraping Data from ASP.net Pages
 
+#### Latest Update: Scrapy currently broken. ec_crawler.py performs all scraping operations (described below) using only the requests library. scrape_functions.py contains functions for scraping central data, state data, and getting form data for posting to subsequent pages. Next task is to troubleshoot scrapy version.
+
 ### Introduction
 This project aims to scrape data from all 250+ pages from [this webpage](http://environmentclearance.nic.in/gotosearch.aspx?pid=ECGranted). The page is written in the ASP.net environment so there is not a separate URL for each page. Clicking on the next page at the bottom instead triggers a `javascript __doPostback` function which takes some visible and some hidden arguements. The goal is to use the scrapy framework to iterate through each page, scrape the fields I need, and pipe it to a csv. 
 
